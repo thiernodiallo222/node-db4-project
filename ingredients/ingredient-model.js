@@ -1,46 +1,37 @@
 
 const db = require("../data/config");
 
-    function find(){
-        return db("recipes");
+function get() {
+    return db("ingredients");
 }
 
-    function findById(id){
+   function getById(id){
+        if (!id) {
+            return null;
+        } else {
+        return db("ingredients").where("ingredients.id", id).first();
+
+        }
+      
+}
+
+  function getIngredientsRecipes(id){
         if (!id) {
             return null;
         }
-        return db("recipes").where({ id }).first();
-}
-
-function findSteps(id) {
-    return db.select("steps.id as step_id ", "recipes.recipe_name",
-        "steps.step_number", "steps.instructions")
-        .from("recipes")
-        .join("steps", "recipes.id", "steps.recipe_id")
-        .where("recipes.id", id).orderBy("steps.id", "asc");
-    
-}
-
-function add(recipe) {
-   return db("recipes").insert(recipe);
-
-}
-
-function update(changes, id) {
-    return db("recipes").where({ id }).update(changes);
-}
-   
-    function remove(id){
-        return db("recipes").where({ id }).del();
+    return db.select("r.id ", "i.name", "r.name" )
+    .from("recipes as r")
+    .join("recipes_ingredients as ri", "r.id", "ri.recipes_id")
+    .join("ingredients as i", "i.id", "ri.ingredients_id")
+    .where("i.id", id)
+    .orderBy("r.id", "asc");          
 }
 
 module.exports = {
-    find,
-    findById,
-    findSteps,
-    add,
-    update,
-    remove,
+    get, 
+    getById,
+   getIngredientsRecipes,
 }
 
-
+//  `GET /api/ingredients/:id/recipes`: all recipes in the system that utilize a single ingredient.
+// <!-- I am adding this so I can make a pull request -->

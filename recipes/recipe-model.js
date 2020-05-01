@@ -34,7 +34,6 @@ function getInstructions(recipe_id) {
     .join("instructions as i", "r.id", "i.recipes_id")
     .where("r.id", recipe_id)
     .orderBy("i.rank");
-
 }
 
 module.exports = {
