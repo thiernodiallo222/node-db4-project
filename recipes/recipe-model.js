@@ -1,46 +1,35 @@
 
+// - `getRecipes()`: should return a list of all recipes in the database.
+// - `getShoppingList(recipe_id)`: should return a list of all ingredients and quantities for a given recipe
+// - `getInstructions(recipe_id)`: should return a list of step by step instructions for preparing a recipe
+
 const db = require("../data/config");
 
-    function find(){
-        return db("recipes");
-}
+    function  getRecipes(){
+        return db("recipes")
+    }
 
-    function findById(id){
-        if (!id) {
+    function getShoppingList(recipe_id){
+        if (!recipe_id) {
             return null;
         }
-        return db("recipes").where({ id }).first();
+        
+        return db("recipes_ingredients")
+            .join("recipes", "recipes.id", "recipes_ingredients.recipes_id")
+            .join("ingredients", "ingredients.id", "recipes_ingredients.ingredients_id").where({ recipe_id }).select("ingredients*").orderBy("ingredients.id");
 }
 
-function findSteps(id) {
-    return db.select("steps.id as step_id ", "recipes.recipe_name",
-        "steps.step_number", "steps.instructions")
-        .from("recipes")
-        .join("steps", "recipes.id", "steps.recipe_id")
-        .where("recipes.id", id).orderBy("steps.id", "asc");
-    
-}
+function getInstructions(recipe_id) {
+    return db("recipes")
+        .join("instructions", "recipes.id", "instructions.recipes_id")
+         .where({ recipe_id }).select("instructions*").orderBy("instructions.id");
 
-function add(recipe) {
-   return db("recipes").insert(recipe);
-
-}
-
-function update(changes, id) {
-    return db("recipes").where({ id }).update(changes);
-}
-   
-    function remove(id){
-        return db("recipes").where({ id }).del();
 }
 
 module.exports = {
-    find,
-    findById,
-    findSteps,
-    add,
-    update,
-    remove,
+    getRecipes,
+    getShoppingList,
+    getInstructions,
 }
 
 

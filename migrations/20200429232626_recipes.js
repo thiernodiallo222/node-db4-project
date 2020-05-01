@@ -4,17 +4,18 @@ exports.up = async function (knex) {
 
   await knex.schema.createTable("recipes", (table) => {
     table.increments("id")
-    table.text("name").notNull().unique()
+    table.string("name").notNull().unique()
   })
 	await knex.schema.createTable("instructions", (table) => {
 		table.increments("id")
-		table.text("title").notNull().unique()
-		 table.text("content").notNull().unique()
-    table.integer("recipes_id")
+		table.integer("recipes_id")
 			.references("id")
 			.inTable("recipes")
 			.onDelete("SET NULL")
 			.onUpdate("CASCADE")
+		table.integer("rank").notNullable()
+		table.text("title").notNull().unique()
+		 table.text("content").notNull().unique()
 	})
 
 	await knex.schema.createTable("ingredients", (table) => {

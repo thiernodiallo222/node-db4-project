@@ -4,8 +4,12 @@ const recipes = require('./recipe-model.js');
 
 const router = express.Router();
 
+//  getRecipes,
+//     getShoppingList,
+//     getInstructions,
+
 router.get('/', (req, res) => {
-  recipes.find()
+  recipes.getRecipes()
   .then(recipes => {
     res.json(recipes);
   })
@@ -14,10 +18,25 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id/shoppingList', (req, res) => {
   const { id } = req.params;
 
-  recipes.findById(id)
+  recipes.getShoppingList(id)
+  .then(recipe => {
+    if (recipe) {
+      res.json(recipe);
+    } else {
+      res.status(404).json({ message: 'Could not find recipe with given id.' })
+    }
+  })
+  .catch(err => {
+    res.status(500).json({ message: 'Failed to get recipes' });
+  });
+});
+router.get('/:id/instructions', (req, res) => {
+  const { id } = req.params;
+
+  recipes.getInstructions(id)
   .then(recipe => {
     if (recipe) {
       res.json(recipe);
@@ -30,88 +49,14 @@ router.get('/:id', (req, res) => {
   });
 });
 
-router.get('/:id/steps', (req, res) => {
-  const { id } = req.params;
 
-  recipes.findSteps(id)
-  .then(steps => {
-    if (steps.length) {
-      res.json(steps);
-    } else {
-      res.status(404).json({ message: 'Could not find steps for given recipe' })
-    }
-  })
-  .catch(err => {
-    res.status(500).json({ message: 'Failed to get steps' });
-  });
-});
 
-router.post('/', (req, res) => {
-  const recipeData = req.body;
 
-  recipes.add(recipeData)
-  .then(recipe => {
-    res.status(201).json(recipe);
-  })
-  .catch (err => {
-    res.status(500).json({ message: 'Failed to create new recipe' });
-  });
-});
-
-router.post('/:id/steps', (req, res) => {
-  const stepData = req.body;
-  const { id } = req.params; 
-
-  recipes.findById(id)
-  .then(recipe => {
-    if (recipe) {
-      recipes.addStep(stepData, id)
-      .then(step => {
-        res.status(201).json(step);
-      })
-    } else {
-      res.status(404).json({ message: 'Could not find recipe with given id.' })
-    }
-  })
-  .catch (err => {
-    res.status(500).json({ message: 'Failed to create new step' });
-  });
-});
-
-router.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const changes = req.body;
-
-  recipes.findById(id)
-  .then(recipe => {
-    if (recipe) {
-      recipes.update(changes, id)
-      .then(updatedRecipe => {
-        res.json(updatedRecipe);
-      });
-    } else {
-      res.status(404).json({ message: 'Could not find recipe with given id' });
-    }
-  })
-  .catch (err => {
-    res.status(500).json({ message: 'Failed to update recipe' });
-  });
-});
-
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-
-  recipes.remove(id)
-  .then(deleted => {
-    if (deleted) {
-      res.json({ removed: deleted });
-    } else {
-      res.status(404).json({ message: 'Could not find recipe with given id' });
-    }
-  })
-  .catch(err => {
-    res.status(500).json({ message: 'Failed to delete recipe' });
-  });
-});
 
 module.exports = router;
+
+// - `GET /api/recipes/`: all recipes (without details about ingredients or steps)
+// - `GET /api/recipes/:id/shoppingList`: a list of ingredients and quantities for a single recipe
+// - `GET /api/recipes/:id/instructions`: a correctly ordered list of how to prepare a single recipe
+// - `GET /api/ingredients/:id/recipes`: all recipes in the system that utilize a single ingredient.
+// <!-- I am adding this so I can make a pull request -->
