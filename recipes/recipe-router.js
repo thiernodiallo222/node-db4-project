@@ -4,9 +4,7 @@ const recipes = require('./recipe-model.js');
 
 const router = express.Router();
 
-//  getRecipes,
-//     getShoppingList,
-//     getInstructions,
+
 
 router.get('/', (req, res) => {
   recipes.getRecipes()
@@ -18,41 +16,46 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/:id/shoppingList', (req, res) => {
-  const { id } = req.params;
+router.get('/:id/', (req, res) => {
 
-  recipes.getShoppingList(id)
-  .then(recipe => {
-    if (recipe) {
-      res.json(recipe);
-    } else {
-      res.status(404).json({ message: 'Could not find recipe with given id.' })
-    }
+  recipes.getById(req.params.id)
+    .then(data => {
+      if (!data) {
+        res.json({ message: 'can\'t find data'});
+      }
+      res.json(data);
+    })
+    .catch(error => {
+      console.log(error);
   })
-  .catch(err => {
-    res.status(500).json({ message: 'Failed to get recipes' });
-  });
-});
-router.get('/:id/instructions', (req, res) => {
-  const { id } = req.params;
+})
 
-  recipes.getInstructions(id)
-  .then(recipe => {
-    if (recipe) {
-      res.json(recipe);
-    } else {
-      res.status(404).json({ message: 'Could not find recipe with given id.' })
+router.get('/:id/shoppingList', async(req, res, next) => {
+  try {
+    const id = req.params.id;
+    const recipe = await recipes.getShoppingList(id)
+        if (recipe.length) {
+          res.json(recipe);
     }
-  })
-  .catch(err => {
-    res.status(500).json({ message: 'Failed to get recipes' });
-  });
-});
+  }catch (error) {
+          next(error);
+      }
+    })
 
-
-
-
-
+ 
+router.get('/:id/instructions', async (req, res, next) => {
+  try {
+    // const id = req.params.id;
+    const data = await recipes.getInstructions(req.params.id)
+        if (data.length) {
+          res.json(data);
+        } else {
+          res.json({message:"data is not found."})
+    }
+  }catch (error) {
+          next(error);
+      }
+    })
 module.exports = router;
 
 // - `GET /api/recipes/`: all recipes (without details about ingredients or steps)
